@@ -24,6 +24,7 @@ Create an API token at **My Profile → API Tokens** with these permissions, the
 | Zone | Zone Settings | Edit | `settings set` |
 | Zone | Page Rules | Edit | `pagerules` |
 | Zone | SSL and Certificates | Read | `ssl status` |
+| Zone | Cache Purge | Purge | `cache purge` |
 
 
 ```bash
@@ -46,6 +47,7 @@ cloudflare <command> [options]
 
 | Command | Description |
 |---------|-------------|
+| `whoami` | Show which token is in use, whether it is valid, and what it can reach |
 | **Zones** | |
 | `zones list` | List all zones in the account |
 | `zones get` | Get a zone, including its status and assigned name servers |
@@ -64,6 +66,8 @@ cloudflare <command> [options]
 | `settings set` | Set a zone setting, e.g. `ssl` or `always_use_https` |
 | **SSL** | |
 | `ssl status` | Show encryption mode, Universal SSL and edge certificate status |
+| **Cache** | |
+| `cache purge` | Purge cached URLs (`--url`, repeatable) or `--everything` from the edge |
 | **Page rules** | |
 | `pagerules list` | List the page rules of a zone |
 | `pagerules add` | Add a page rule, e.g. to force HTTPS on one hostname |
@@ -106,6 +110,19 @@ use a page rule:
 ```bash
 cloudflare pagerules add --zone example.com --url "secure.example.com/*" --always-use-https
 ```
+
+Check which token you are about to use, and what it can reach, before changing anything:
+
+```bash
+cloudflare whoami                 # token id, name, status, expiry, accounts, zones
+cloudflare whoami --permissions   # also every permission, per policy
+```
+
+`whoami` verifies the token at `user/tokens/verify`; an account-owned token can only be verified
+at its account's endpoint, so pass `--account-id` (or set `CLOUDFLARE_ACCOUNT_ID`) for one of
+those. Everything after the verify call needs its own read permission; a missing one is shown
+as `unavailable: ...` instead of failing the command. The exit code is 0 only for an active
+token. The token itself is never printed.
 
 Check that HTTPS is actually live before relying on it:
 

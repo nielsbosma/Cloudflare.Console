@@ -1,3 +1,5 @@
+using Cloudflare.Console.Commands;
+using Cloudflare.Console.Commands.Cache;
 using Cloudflare.Console.Commands.PageRules;
 using Cloudflare.Console.Commands.Records;
 using Cloudflare.Console.Commands.Settings;
@@ -10,6 +12,9 @@ var app = new CommandApp();
 app.Configure(config =>
 {
     config.SetApplicationName("cloudflare");
+
+    config.AddCommand<WhoamiCommand>("whoami")
+        .WithDescription("Show which token is in use, whether it is valid, and what it can reach");
 
     config.AddBranch("zones", zones =>
     {
@@ -57,6 +62,13 @@ app.Configure(config =>
         ssl.SetDescription("Inspect TLS configuration");
         ssl.AddCommand<SslStatusCommand>("status")
             .WithDescription("Show encryption mode, Universal SSL and edge certificate status");
+    });
+
+    config.AddBranch("cache", cache =>
+    {
+        cache.SetDescription("Manage Cloudflare's cache");
+        cache.AddCommand<PurgeCacheCommand>("purge")
+            .WithDescription("Purge cached URLs, or everything, from Cloudflare's edge");
     });
 
     config.AddBranch("pagerules", pagerules =>
